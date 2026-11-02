@@ -1,0 +1,11 @@
+# relatórios gerados pelo Robot Framework
+reports/
+log.html
+report.html
+output.xml
+*.png
+
+# python
+__pycache__/
+.venv/
+venv/
