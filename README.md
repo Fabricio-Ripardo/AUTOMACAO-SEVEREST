@@ -1,66 +1,78 @@
-# Automação de testes da API ServeRest
+# Automação de testes da ServeRest — API e Web
 
 ![Testes](https://github.com/Fabricio-Ripardo/AUTOMACAO-SEVEREST/actions/workflows/testes.yml/badge.svg)
 
-Testes automatizados da [ServeRest](https://serverest.dev), uma API REST que simula uma loja virtual, usando **Robot Framework** e **RequestsLibrary**.
+Testes automatizados da [ServeRest](https://serverest.dev), uma loja virtual simulada, em duas frentes:
+
+- **API** — a [API REST](https://serverest.dev), com **Robot Framework + RequestsLibrary**
+- **Web** — o [front-end](https://front.serverest.dev), com **Robot Framework + SeleniumLibrary**
 
 ## O que é testado
+
+### API — 30 casos
 
 | Rota | Cenários positivos | Cenários negativos |
 | --- | --- | --- |
 | `/usuarios` | cadastro, listagem, filtro por e-mail, busca por ID, edição e exclusão | e-mail duplicado, e-mail vazio, ID inexistente, exclusão sem registro |
-| `/login` | login com credenciais válidas e retorno do token `Bearer` | senha incorreta, e-mail não cadastrado, campos vazios |
+| `/login` | login válido e retorno do token `Bearer` | senha incorreta, e-mail não cadastrado, campos vazios |
 | `/produtos` | cadastro, listagem, busca por ID, edição e exclusão | nome repetido, sem token (401), usuário sem permissão de admin (403), ID inexistente |
-| `/carrinhos` | cadastro, concluir compra e cancelar compra com conferência do estoque | mais de um carrinho por usuário, sem token, estoque insuficiente |
+| `/carrinhos` | cadastro, concluir e cancelar compra com conferência do estoque | mais de um carrinho por usuário, sem token, estoque insuficiente |
 
-Ao todo são **30 casos de teste**, marcados com as tags `positivo`, `negativo` e `seguranca`.
+### Web — 14 casos
+
+| Tela | Cenários positivos | Cenários negativos |
+| --- | --- | --- |
+| Login | administrador vai para a área admin; usuário comum vai para a loja | senha incorreta, e-mail não cadastrado |
+| Cadastro de usuários | cadastro de administrador e de usuário comum, conferindo a listagem | e-mail já usado, sem nome, sem e-mail, sem senha |
+| Cadastro de produtos | cadastro conferindo a listagem | sem nome, sem preço, sem descrição |
+
+Os testes são marcados com as tags `api`/`web`, `positivo`, `negativo` e `seguranca`.
 
 ## Como os testes foram pensados
 
-- **Independentes:** cada teste cria os próprios dados (usuários com e-mail aleatório, produtos com nome aleatório). Não há IDs fixos, então os testes passam em qualquer execução, mesmo depois que a ServeRest reinicia a base.
-- **Validações de verdade:** cada teste confere o status code e, quando faz sentido, a mensagem da API e os campos da resposta. Depois de editar ou excluir, o teste consulta o registro de novo para garantir que a alteração aconteceu.
-- **Regras de negócio:** os testes de carrinho conferem se o estoque do produto diminui ao comprar e volta ao valor original ao cancelar a compra.
-- **Keywords reutilizáveis:** a lógica das requisições fica em `resources/`, e os testes em `tests/` leem quase como uma especificação.
+- **Independentes:** cada teste cria os próprios dados (e-mails e nomes aleatórios). Não há IDs nem usuários fixos, então os testes passam em qualquer execução, mesmo depois que a ServeRest reinicia a base.
+- **Dados preparados pela API:** os testes Web criam os usuários de apoio pela API, que é rápida e estável, e usam o navegador só para o que estão testando.
+- **Validações de verdade:** status code, mensagens e campos da resposta na API; URL, mensagens de erro e listagens na interface.
+- **Regras de negócio:** os testes de carrinho conferem se o estoque diminui ao comprar e volta ao valor original ao cancelar.
+- **Sem `Sleep`:** a interface usa esperas explícitas (o teste espera o elemento aparecer), o que deixa a execução mais rápida e estável.
+- **Navegador limpo a cada teste**, com screenshot automático no relatório quando um teste falha.
 
 ## Estrutura
 
 ```
 resources/
-  base.resource         configuração, geração de dados e validações comuns
-  usuarios.resource     keywords da rota /usuarios
-  login.resource        keywords de login e obtenção de token
-  produtos.resource     keywords da rota /produtos
-  carrinhos.resource    keywords da rota /carrinhos
+  api/      keywords das rotas (usuarios, login, produtos, carrinhos)
+  web/      keywords e locators de cada tela (login, usuarios, produtos)
 tests/
-  usuarios.robot
-  login.robot
-  produtos.robot
-  carrinhos.robot
-.github/workflows/
-  testes.yml            execução automática no GitHub Actions
+  api/      30 casos de teste da API
+  web/      14 casos de teste da interface
+.github/workflows/testes.yml   execução automática no GitHub Actions
 ```
 
 ## Como rodar
 
-Pré-requisito: Python 3.10+.
+Pré-requisitos: Python 3.10+ e Google Chrome (para os testes Web).
 
 ```bash
 pip install -r requirements.txt
-robot --outputdir reports tests
+
+robot --outputdir reports tests                    # tudo
+robot --outputdir reports tests/api                # só API
+robot --outputdir reports tests/web                # só Web
+robot --outputdir reports --include negativo tests # só cenários negativos
 ```
 
 Abra `reports/report.html` no navegador para ver o relatório.
 
-Rodar só uma parte:
+Para rodar os testes Web sem abrir a janela do navegador:
 
 ```bash
-robot --outputdir reports tests/login.robot        # um arquivo
-robot --outputdir reports --include negativo tests # só os cenários negativos
+robot --outputdir reports --variable BROWSER:headlesschrome tests/web
 ```
 
 ## Integração contínua
 
-Os testes rodam automaticamente no **GitHub Actions** a cada push, em pull requests e toda segunda-feira. O relatório de cada execução fica disponível para download na aba **Actions** do repositório.
+Os testes de API e Web rodam em paralelo no **GitHub Actions** a cada push, em pull requests e toda segunda-feira. O relatório de cada execução fica disponível para download na aba **Actions**.
 
 ## Autor
 

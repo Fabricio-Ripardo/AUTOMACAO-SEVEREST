@@ -1,7 +1,7 @@
 *** Settings ***
 Documentation     Testes da rota /login da ServeRest.
-Resource          ../resources/login.resource
-Test Tags         login
+Resource          ../../resources/api/login.resource
+Test Tags         api    login
 
 
 *** Test Cases ***

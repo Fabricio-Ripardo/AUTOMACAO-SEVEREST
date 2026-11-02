@@ -1,33 +1,45 @@
-name: Testes da API ServeRest
+name: Testes ServeRest
 
 on:
   push:
   pull_request:
   workflow_dispatch:
   schedule:
-    - cron: "0 12 * * 1"   # toda segunda-feira, para detectar mudanças na API
+    - cron: "0 12 * * 1"   # toda segunda-feira, para detectar mudanças na aplicação
 
 jobs:
-  robot:
+  api:
+    name: Testes de API
     runs-on: ubuntu-latest
     steps:
-      - name: Baixar o código
-        uses: actions/checkout@v4
-
-      - name: Configurar Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
-      - name: Instalar dependências
-        run: pip install -r requirements.txt
-
-      - name: Rodar os testes
-        run: robot --outputdir reports tests
-
+      - run: pip install -r requirements.txt
+      - name: Rodar testes de API
+        run: robot --outputdir reports/api tests/api
       - name: Publicar relatório
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: relatorio-robot
-          path: reports
+          name: relatorio-api
+          path: reports/api
+
+  web:
+    name: Testes Web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Rodar testes Web (Chrome sem interface gráfica)
+        run: robot --outputdir reports/web --variable BROWSER:headlesschrome tests/web
+      - name: Publicar relatório
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-web
+          path: reports/web

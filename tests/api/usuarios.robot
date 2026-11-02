@@ -1,7 +1,7 @@
 *** Settings ***
 Documentation     Testes da rota /usuarios da ServeRest.
-Resource          ../resources/usuarios.resource
-Test Tags         usuarios
+Resource          ../../resources/api/usuarios.resource
+Test Tags         api    usuarios
 
 
 *** Test Cases ***

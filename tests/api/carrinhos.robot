@@ -1,11 +1,11 @@
 *** Settings ***
 Documentation     Testes da rota /carrinhos da ServeRest (fluxo de compra).
 ...               Cada teste usa um usuário novo, porque a API só permite um carrinho por usuário.
-Resource          ../resources/login.resource
-Resource          ../resources/produtos.resource
-Resource          ../resources/carrinhos.resource
+Resource          ../../resources/api/login.resource
+Resource          ../../resources/api/produtos.resource
+Resource          ../../resources/api/carrinhos.resource
 Suite Setup       Preparar Produto
-Test Tags         carrinhos
+Test Tags         api    carrinhos
 
 
 *** Test Cases ***

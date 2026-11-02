@@ -1,9 +1,9 @@
 *** Settings ***
 Documentation     Testes da rota /produtos da ServeRest.
-Resource          ../resources/login.resource
-Resource          ../resources/produtos.resource
+Resource          ../../resources/api/login.resource
+Resource          ../../resources/api/produtos.resource
 Suite Setup       Preparar Tokens
-Test Tags         produtos
+Test Tags         api    produtos
 
 
 *** Test Cases ***
