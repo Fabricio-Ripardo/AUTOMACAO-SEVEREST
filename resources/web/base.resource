@@ -9,12 +9,23 @@ Resource          ../api/login.resource
 *** Variables ***
 ${URL_FRONT}      https://front.serverest.dev
 ${BROWSER}        chrome
+# HEADLESS=True roda o Chrome sem janela (usado no GitHub Actions).
+${HEADLESS}       ${False}
 
 
 *** Keywords ***
 Abrir Navegador
-    Open Browser    ${URL_FRONT}/login    ${BROWSER}
-    Set Window Size    1920    1080
+    ${opcoes}=    Set Variable    add_argument("--window-size=1920,1080")
+    IF    ${HEADLESS}
+        # Opções necessárias para o Chrome iniciar em servidores Linux, como os do GitHub Actions
+        ${opcoes}=    Catenate    SEPARATOR=;    ${opcoes}
+        ...    add_argument("--headless=new")
+        ...    add_argument("--no-sandbox")
+        ...    add_argument("--disable-dev-shm-usage")
+        ...    add_argument("--disable-gpu")
+    END
+    Open Browser    ${URL_FRONT}/login    ${BROWSER}    options=${opcoes}
+    IF    not ${HEADLESS}    Maximize Browser Window
 
 Fechar Navegador
     Run Keyword If Test Failed    Capture Page Screenshot

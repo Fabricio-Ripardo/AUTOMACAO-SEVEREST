@@ -18,7 +18,8 @@ Login de usuario comum leva para a loja
     ${usuario}=    Criar Usuario Valido    administrador=false
     Entrar No Sistema    ${usuario}[email]    ${usuario}[password]
     Wait Until Location Contains    /home
-    Location Should Not Contain    /admin
+    ${url}=    Get Location
+    Should Not Contain    ${url}    /admin
 
 Login com senha incorreta
     [Tags]    negativo

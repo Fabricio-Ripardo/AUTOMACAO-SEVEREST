@@ -67,7 +67,7 @@ Abra `reports/report.html` no navegador para ver o relatório.
 Para rodar os testes Web sem abrir a janela do navegador:
 
 ```bash
-robot --outputdir reports --variable BROWSER:headlesschrome tests/web
+robot --outputdir reports --variable HEADLESS:True tests/web
 ```
 
 ## Integração contínua
